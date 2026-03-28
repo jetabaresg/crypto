@@ -72,7 +72,9 @@ def evaluar_resultados(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
             )
         )
 
-    score = _calcular_score(hallazgos)
+    score_base = _calcular_score_base(hallazgos)
+    herramientas_validas, herramientas_invalidas, herramientas_total = _resumen_herramientas(resultados)
+    score = _calcular_score_final(score_base, herramientas_invalidas, herramientas_total)
     riesgo = _clasificar_riesgo(score)
     recomendaciones_base = _consolidar_recomendaciones(hallazgos)
     recomendaciones, recomendaciones_fuente = _recomendaciones_con_ia(
@@ -83,16 +85,18 @@ def evaluar_resultados(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         protocolos=sorted(protocolos),
         recomendaciones_fallback=recomendaciones_base,
     )
-    herramientas_validas, herramientas_invalidas, herramientas_total = _resumen_herramientas(resultados)
     prueba_completa = herramientas_validas == herramientas_total
     estado_prueba = (
         "Prueba realizada correctamente"
         if prueba_completa
         else "Prueba parcial: faltan herramientas o alguna no respondio"
     )
+    penalizacion_cobertura = score_base - score
 
     return {
         "score": score,
+        "score_base": score_base,
+        "penalizacion_cobertura": penalizacion_cobertura,
         "riesgo": riesgo,
         "protocolos_detectados": sorted(protocolos),
         "hallazgos": hallazgos,
@@ -119,11 +123,20 @@ def _agrupar_protocolos_y_cifrados(resultados: Dict[str, Dict[str, Any]]) -> tup
     return protocolos, cifrados
 
 
-def _calcular_score(hallazgos: List[Dict[str, str]]) -> int:
+def _calcular_score_base(hallazgos: List[Dict[str, str]]) -> int:
     score = 100
     for h in hallazgos:
         score -= _PESOS.get(h["severidad"], 0)
     return max(0, score)
+
+
+def _calcular_score_final(score_base: int, herramientas_invalidas: int, herramientas_total: int) -> int:
+    # Penalizacion por cobertura: maximo 40 puntos menos cuando no hay evidencia tecnica.
+    if herramientas_total <= 0:
+        return score_base
+    fraccion_invalida = herramientas_invalidas / herramientas_total
+    penalizacion = round(40 * fraccion_invalida)
+    return max(0, score_base - penalizacion)
 
 
 def _clasificar_riesgo(score: int) -> str:

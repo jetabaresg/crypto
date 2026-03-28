@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reporte TLS - 34.45.64.235</title>
+    <title>Reporte TLS - google.com</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f6f8fb; color: #15202b; margin: 0; }
         .container { max-width: 1000px; margin: 28px auto; padding: 0 16px; }
@@ -12,20 +12,34 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { border-bottom: 1px solid #e4eaf2; padding: 9px 7px; text-align: left; vertical-align: top; font-size: 14px; }
         .pill { display: inline-block; border-radius: 999px; padding: 4px 10px; background: #e8efff; }
-        .critical, .high { color: #a32020; font-weight: bold; }
+        .critical { color: #a32020; font-weight: bold; }
+        .high { color: #b45309; font-weight: bold; }
         .medium { color: #8d5a00; font-weight: bold; }
         .low { color: #0a7a49; font-weight: bold; }
+        .sev-grid { display: grid; grid-template-columns: repeat(4, minmax(110px, 1fr)); gap: 10px; }
+        .sev-item { border: 1px solid #e4eaf2; border-radius: 8px; padding: 10px; text-align: center; }
+        .sev-num { display: block; font-size: 24px; font-weight: 700; line-height: 1.1; }
     </style>
 </head>
 <body>
     <div class="container">
         <section class="card">
             <h1>Reporte de Seguridad TLS</h1>
-            <p><strong>Objetivo:</strong> 34.45.64.235:443</p>
-            <p><strong>Score:</strong> 100/100 (0/4 validas, 4 invalidas)</p>
+            <p><strong>Objetivo:</strong> google.com:443</p>
+            <p><strong>Score:</strong> 60/100 (0/4 validas, 4 invalidas)</p>
             <p><strong>Estado de prueba:</strong> Prueba parcial: faltan herramientas o alguna no respondio</p>
-            <p><strong>Riesgo:</strong> <span class="pill">Bajo</span></p>
+            <p><strong>Riesgo:</strong> <span class="pill">Alto</span></p>
             <p><strong>Protocolos detectados:</strong> -</p>
+        </section>
+
+        <section class="card">
+            <h2>Resumen de Severidades</h2>
+            <div class="sev-grid">
+                <div class="sev-item"><span class="sev-num critical">0</span>Critical</div>
+                <div class="sev-item"><span class="sev-num high">0</span>High</div>
+                <div class="sev-item"><span class="sev-num medium">0</span>Medium</div>
+                <div class="sev-item"><span class="sev-num low">0</span>Low</div>
+            </div>
         </section>
 
         <section class="card">
@@ -65,7 +79,7 @@
 
         <section class="card">
             <h2>Recomendaciones</h2>
-            <ul><li>Instalar y configurar herramientas de análisis de seguridad TLS como nmap, testssl.sh, sslscan y openssl para realizar auditorías regulares.</li><li>Asegurarse de que el servidor esté configurado para utilizar solo versiones seguras de TLS (TLS 1.2 y TLS 1.3) y deshabilitar versiones obsoletas como SSL 2.0 y SSL 3.0.</li><li>Implementar políticas de seguridad que incluyan el uso de cifrados fuertes y seguros, evitando aquellos que sean considerados débiles o vulnerables.</li><li>Realizar pruebas de penetración periódicas para identificar y remediar posibles vulnerabilidades en la implementación de TLS.</li><li>Mantener actualizados todos los componentes del servidor y las bibliotecas de TLS para protegerse contra vulnerabilidades conocidas.</li><li>Configurar correctamente los certificados TLS, asegurándose de que estén firmados por una autoridad de certificación confiable y que no estén caducados.</li><li>Habilitar la verificación de la cadena de certificados en el cliente para prevenir ataques de intermediarios.</li><li>Implementar HSTS (HTTP Strict Transport Security) para forzar el uso de conexiones seguras en el navegador.</li></ul>
+            <ul><li>Habilitar solamente TLS 1.2 y TLS 1.3.</li><li>Deshabilitar suites de cifrado obsoletas o debiles.</li><li>Mantener OpenSSL, servidor web y librerias criptograficas actualizadas.</li><li>Aplicar HSTS y revisar configuraciones periodicamente.</li></ul>
         </section>
     </div>
 </body>

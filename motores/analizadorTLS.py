@@ -114,12 +114,29 @@ def _resolver_testssl() -> str:
     return "testssl.sh"
 
 
+def _construir_cmd_testssl(objetivo: str, puerto: int) -> list[str]:
+    ruta = _resolver_testssl()
+    args = ["--warnings", "off", "--quiet"]
+
+    # En modo rapido reduce mucho los 124 en entornos lentos.
+    if os.getenv("TESTSSL_FAST", "1").strip() != "0":
+        args.append("--fast")
+    args.append(f"{objetivo}:{puerto}")
+
+    # Si tenemos script .sh y bash disponible, forzamos ejecucion via bash.
+    if ruta.endswith(".sh") and shutil.which("bash") is not None:
+        return ["bash", ruta, *args]
+
+    return [ruta, *args]
+
+
 def analizar_tls(objetivo: str, puerto: int = 443, timeout: int = 25) -> Dict[str, Dict[str, Any]]:
-    testssl_cmd = [_resolver_testssl(), "--warnings", "off", "--quiet", f"{objetivo}:{puerto}"]
+    testssl_cmd = _construir_cmd_testssl(objetivo, puerto)
 
     # testssl y sslscan suelen requerir mas tiempo que openssl/nmap.
     timeout_nmap = max(timeout, 20)
-    timeout_testssl = max(timeout * 3, 60)
+    timeout_testssl = max(timeout * 6, 180)
+    timeout_testssl = int(os.getenv("TESTSSL_TIMEOUT", str(timeout_testssl)))
     timeout_sslscan = max(timeout * 2, 40)
     timeout_openssl = max(timeout, 20)
 
