@@ -33,7 +33,8 @@ def _hallazgo(
 def evaluar_resultados(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     hallazgos: List[Dict[str, str]] = []
 
-    protocolos, cifrados = _agrupar_protocolos_y_cifrados(resultados)
+    resultados_validos = _resultados_validos(resultados)
+    protocolos, cifrados = _agrupar_protocolos_y_cifrados(resultados_validos)
 
     inseguros_proto = sorted(p for p in protocolos if p in _PROTOCOLS_INSEGUROS)
     if inseguros_proto:
@@ -50,6 +51,7 @@ def evaluar_resultados(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         c
         for c in cifrados
         if any(marca in c.upper() for marca in _MARCAS_CIFRADO_DEBIL)
+        and _cifrado_con_evidencia_fuerte(c, resultados_validos)
     )
     if debiles:
         hallazgos.append(
@@ -124,6 +126,26 @@ def _agrupar_protocolos_y_cifrados(resultados: Dict[str, Dict[str, Any]]) -> tup
         cifrados.update(parsed.get("cifrados", []))
 
     return protocolos, cifrados
+
+
+def _resultados_validos(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    validos: Dict[str, Dict[str, Any]] = {}
+    for fuente in _FUENTES:
+        data = resultados.get(fuente, {})
+        metadata = data.get("metadata", {})
+        if metadata.get("disponible", False) and metadata.get("returncode") == 0:
+            validos[fuente] = data
+    return validos
+
+
+def _cifrado_con_evidencia_fuerte(cifrado: str, resultados_validos: Dict[str, Dict[str, Any]]) -> bool:
+    # Priorizamos evidencia de herramientas enfocadas en cifrados.
+    fuentes_fuertes = ("sslscan", "testssl")
+    for fuente in fuentes_fuertes:
+        parsed = resultados_validos.get(fuente, {}).get("parsed", {})
+        if cifrado in parsed.get("cifrados", []):
+            return True
+    return False
 
 
 def _calcular_score_base(hallazgos: List[Dict[str, str]]) -> int:
