@@ -116,28 +116,37 @@ def _resolver_testssl() -> str:
 
 def analizar_tls(objetivo: str, puerto: int = 443, timeout: int = 25) -> Dict[str, Dict[str, Any]]:
     testssl_cmd = [_resolver_testssl(), "--warnings", "off", "--quiet", f"{objetivo}:{puerto}"]
-    
+
+    # testssl y sslscan suelen requerir mas tiempo que openssl/nmap.
+    timeout_nmap = max(timeout, 20)
+    timeout_testssl = max(timeout * 3, 60)
+    timeout_sslscan = max(timeout * 2, 40)
+    timeout_openssl = max(timeout, 20)
+
     herramientas = {
         "nmap": {
             "cmd": ["nmap", "-p", str(puerto), "--script", "ssl-enum-ciphers,ssl-heartbleed,ssl-poodle", objetivo],
             "parser": parse_nmap,
+            "timeout": timeout_nmap,
         },
         "testssl": {
             "cmd": testssl_cmd,
             "parser": parse_testssl,
+            "timeout": timeout_testssl,
         },
         "sslscan": {
             "cmd": _construir_cmd_sslscan(objetivo, puerto),
             "parser": parse_sslscan,
+            "timeout": timeout_sslscan,
         },
     }
 
     resultados: Dict[str, Dict[str, Any]] = {}
     for nombre, conf in herramientas.items():
-        raw_tool = _ejecutar(conf["cmd"], timeout)
+        raw_tool = _ejecutar(conf["cmd"], conf["timeout"])
         resultados[nombre] = _resultado_parseado(raw_tool, conf["parser"])
 
-    raw_openssl = _openssl_via_bash(objetivo, puerto, timeout)
+    raw_openssl = _openssl_via_bash(objetivo, puerto, timeout_openssl)
     if not raw_openssl["disponible"]:
         raw_openssl = _ejecutar(
             [
@@ -149,7 +158,7 @@ def analizar_tls(objetivo: str, puerto: int = 443, timeout: int = 25) -> Dict[st
                 objetivo,
                 "-brief",
             ],
-            timeout,
+            timeout_openssl,
         )
     resultados["openssl"] = _resultado_parseado(raw_openssl, parse_openssl)
 
