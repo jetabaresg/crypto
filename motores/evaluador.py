@@ -116,6 +116,9 @@ def _agrupar_protocolos_y_cifrados(resultados: Dict[str, Dict[str, Any]]) -> tup
     cifrados: set[str] = set()
 
     for fuente in _FUENTES:
+        metadata = resultados.get(fuente, {}).get("metadata", {})
+        if not (metadata.get("disponible", False) and metadata.get("returncode") == 0):
+            continue
         parsed = resultados.get(fuente, {}).get("parsed", {})
         protocolos.update(parsed.get("protocolos", []))
         cifrados.update(parsed.get("cifrados", []))
