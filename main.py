@@ -86,7 +86,18 @@ def main() -> None:
         salida = _resolver_salida(base_salida, objetivo, varios_objetivos)
         generar_reporte_html(salida, objetivo, args.puerto, resultados, evaluacion)
 
-        print(f"[+] Riesgo: {evaluacion['riesgo']} | Score: {evaluacion['score']}/100")
+        fuente_recomendaciones = evaluacion.get("recomendaciones_fuente", "fallback")
+        if fuente_recomendaciones == "ia":
+            print("[+] Recomendaciones: IA activa")
+        else:
+            print("[+] Recomendaciones: fallback local")
+        herramientas_ok = evaluacion.get("herramientas_ok", 0)
+        herramientas_total = evaluacion.get("herramientas_total", 4)
+        print(
+            f"[+] Riesgo: {evaluacion['riesgo']} | "
+            f"Score: {evaluacion['score']}/100 ({herramientas_ok}/{herramientas_total} herramientas)"
+        )
+        print(f"[+] Estado de prueba: {evaluacion.get('estado_prueba', 'Sin estado')}")
         print(f"[+] Reporte generado: {salida.resolve()}")
 
 

@@ -18,76 +18,80 @@ def generar_reporte_html(
 
     herramientas_html = "".join(_fila_herramienta(nombre, data) for nombre, data in resultados.items())
     recomendaciones = "".join(f"<li>{escape(r)}</li>" for r in evaluacion["recomendaciones"])
+    herramientas_ok = evaluacion.get("herramientas_ok", 0)
+    herramientas_total = evaluacion.get("herramientas_total", 4)
+    estado_prueba = evaluacion.get("estado_prueba", "Sin estado")
 
     html = f"""<!doctype html>
 <html lang=\"es\">
 <head>
-	<meta charset=\"utf-8\">
-	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-	<title>Reporte TLS - {escape(objetivo)}</title>
-	<style>
-		body {{ font-family: Arial, sans-serif; background: #f6f8fb; color: #15202b; margin: 0; }}
-		.container {{ max-width: 1000px; margin: 28px auto; padding: 0 16px; }}
-		.card {{ background: #fff; border: 1px solid #d8e0eb; border-radius: 10px; padding: 16px; margin-bottom: 14px; }}
-		h1, h2 {{ margin-top: 0; }}
-		table {{ width: 100%; border-collapse: collapse; }}
-		th, td {{ border-bottom: 1px solid #e4eaf2; padding: 9px 7px; text-align: left; vertical-align: top; font-size: 14px; }}
-		.pill {{ display: inline-block; border-radius: 999px; padding: 4px 10px; background: #e8efff; }}
-		.critical, .high {{ color: #a32020; font-weight: bold; }}
-		.medium {{ color: #8d5a00; font-weight: bold; }}
-		.low {{ color: #0a7a49; font-weight: bold; }}
-	</style>
+    <meta charset=\"utf-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+    <title>Reporte TLS - {escape(objetivo)}</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; background: #f6f8fb; color: #15202b; margin: 0; }}
+        .container {{ max-width: 1000px; margin: 28px auto; padding: 0 16px; }}
+        .card {{ background: #fff; border: 1px solid #d8e0eb; border-radius: 10px; padding: 16px; margin-bottom: 14px; }}
+        h1, h2 {{ margin-top: 0; }}
+        table {{ width: 100%; border-collapse: collapse; }}
+        th, td {{ border-bottom: 1px solid #e4eaf2; padding: 9px 7px; text-align: left; vertical-align: top; font-size: 14px; }}
+        .pill {{ display: inline-block; border-radius: 999px; padding: 4px 10px; background: #e8efff; }}
+        .critical, .high {{ color: #a32020; font-weight: bold; }}
+        .medium {{ color: #8d5a00; font-weight: bold; }}
+        .low {{ color: #0a7a49; font-weight: bold; }}
+    </style>
 </head>
 <body>
-	<div class=\"container\">
-		<section class=\"card\">
-			<h1>Reporte de Seguridad TLS</h1>
-			<p><strong>Objetivo:</strong> {escape(objetivo)}:{puerto}</p>
-			<p><strong>Score:</strong> {evaluacion['score']}/100</p>
-			<p><strong>Riesgo:</strong> <span class=\"pill\">{escape(evaluacion['riesgo'])}</span></p>
-			<p><strong>Protocolos detectados:</strong> {escape(', '.join(evaluacion['protocolos_detectados']) or '-')}</p>
-		</section>
+    <div class=\"container\">
+        <section class=\"card\">
+            <h1>Reporte de Seguridad TLS</h1>
+            <p><strong>Objetivo:</strong> {escape(objetivo)}:{puerto}</p>
+            <p><strong>Score:</strong> {evaluacion['score']}/100 ({herramientas_ok}/{herramientas_total} herramientas)</p>
+            <p><strong>Estado de prueba:</strong> {escape(estado_prueba)}</p>
+            <p><strong>Riesgo:</strong> <span class=\"pill\">{escape(evaluacion['riesgo'])}</span></p>
+            <p><strong>Protocolos detectados:</strong> {escape(', '.join(evaluacion['protocolos_detectados']) or '-')}</p>
+        </section>
 
-		<section class=\"card\">
-			<h2>Hallazgos</h2>
-			<table>
-				<thead>
-					<tr>
-						<th>Severidad</th>
-						<th>Titulo</th>
-						<th>Detalle</th>
-						<th>Recomendacion</th>
-					</tr>
-				</thead>
-				<tbody>
-					{hallazgos_html}
-				</tbody>
-			</table>
-		</section>
+        <section class=\"card\">
+            <h2>Hallazgos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Severidad</th>
+                        <th>Titulo</th>
+                        <th>Detalle</th>
+                        <th>Recomendacion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {hallazgos_html}
+                </tbody>
+            </table>
+        </section>
 
-		<section class=\"card\">
-			<h2>Estado de Herramientas</h2>
-			<table>
-				<thead>
-					<tr>
-						<th>Herramienta</th>
-						<th>Estado</th>
-						<th>Protocolos</th>
-						<th>Cifrados</th>
-						<th>Detalle</th>
-					</tr>
-				</thead>
-				<tbody>
-					{herramientas_html}
-				</tbody>
-			</table>
-		</section>
+        <section class=\"card\">
+            <h2>Estado de Herramientas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Herramienta</th>
+                        <th>Estado</th>
+                        <th>Protocolos</th>
+                        <th>Cifrados</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {herramientas_html}
+                </tbody>
+            </table>
+        </section>
 
-		<section class=\"card\">
-			<h2>Recomendaciones</h2>
-			<ul>{recomendaciones}</ul>
-		</section>
-	</div>
+        <section class=\"card\">
+            <h2>Recomendaciones</h2>
+            <ul>{recomendaciones}</ul>
+        </section>
+    </div>
 </body>
 </html>
 """
@@ -107,27 +111,27 @@ def _fila_hallazgo(hallazgo: Dict[str, str]) -> str:
 
 
 def _fila_herramienta(nombre: str, data: Dict[str, Any]) -> str:
-	meta = data.get("metadata", {})
-	parsed = data.get("parsed", {})
-	disponible = meta.get("disponible", False)
-	code = meta.get("returncode")
-	detalle_error = meta.get("stderr", "") or "-"
+    meta = data.get("metadata", {})
+    parsed = data.get("parsed", {})
+    disponible = meta.get("disponible", False)
+    code = meta.get("returncode")
+    detalle_error = meta.get("stderr", "") or "-"
 
-	if disponible and code == 0:
-		estado = "OK"
-	elif not disponible:
-		estado = "No disponible"
-	else:
-		estado = f"Error ({code})"
+    if disponible and code == 0:
+        estado = "OK"
+    elif not disponible:
+        estado = "No disponible"
+    else:
+        estado = f"Error ({code})"
 
-	protos = ", ".join(parsed.get("protocolos", [])) or "-"
-	cifrados = str(len(parsed.get("cifrados", [])))
-	return (
-		"<tr>"
-		f"<td>{escape(nombre)}</td>"
-		f"<td>{escape(estado)}</td>"
-		f"<td>{escape(protos)}</td>"
-		f"<td>{escape(cifrados)}</td>"
-		f"<td>{escape(detalle_error)}</td>"
-		"</tr>"
-	)
+    protos = ", ".join(parsed.get("protocolos", [])) or "-"
+    cifrados = str(len(parsed.get("cifrados", [])))
+    return (
+        "<tr>"
+        f"<td>{escape(nombre)}</td>"
+        f"<td>{escape(estado)}</td>"
+        f"<td>{escape(protos)}</td>"
+        f"<td>{escape(cifrados)}</td>"
+        f"<td>{escape(detalle_error)}</td>"
+        "</tr>"
+    )

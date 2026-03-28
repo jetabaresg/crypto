@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reporte TLS - 34.45.64.235</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f6f8fb; color: #15202b; margin: 0; }
+        .container { max-width: 1000px; margin: 28px auto; padding: 0 16px; }
+        .card { background: #fff; border: 1px solid #d8e0eb; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+        h1, h2 { margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid #e4eaf2; padding: 9px 7px; text-align: left; vertical-align: top; font-size: 14px; }
+        .pill { display: inline-block; border-radius: 999px; padding: 4px 10px; background: #e8efff; }
+        .critical, .high { color: #a32020; font-weight: bold; }
+        .medium { color: #8d5a00; font-weight: bold; }
+        .low { color: #0a7a49; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section class="card">
+            <h1>Reporte de Seguridad TLS</h1>
+            <p><strong>Objetivo:</strong> 34.45.64.235:443</p>
+            <p><strong>Score:</strong> 100/100 (0/4 herramientas)</p>
+            <p><strong>Estado de prueba:</strong> Prueba parcial: faltan herramientas o alguna no respondio</p>
+            <p><strong>Riesgo:</strong> <span class="pill">Bajo</span></p>
+            <p><strong>Protocolos detectados:</strong> -</p>
+        </section>
+
+        <section class="card">
+            <h2>Hallazgos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Severidad</th>
+                        <th>Titulo</th>
+                        <th>Detalle</th>
+                        <th>Recomendacion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="4">No se detectaron hallazgos con las reglas actuales.</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="card">
+            <h2>Estado de Herramientas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Herramienta</th>
+                        <th>Estado</th>
+                        <th>Protocolos</th>
+                        <th>Cifrados</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>nmap</td><td>No disponible</td><td>-</td><td>0</td><td>No se encontro nmap</td></tr><tr><td>testssl</td><td>No disponible</td><td>-</td><td>0</td><td>No se encontro testssl.sh</td></tr><tr><td>sslscan</td><td>No disponible</td><td>-</td><td>0</td><td>No se encontro sslscan</td></tr><tr><td>openssl</td><td>No disponible</td><td>-</td><td>0</td><td>No se encontro openssl</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="card">
+            <h2>Recomendaciones</h2>
+            <ul><li>Instalar y configurar herramientas de análisis de seguridad TLS como nmap, testssl.sh, sslscan y openssl para evaluar la configuración actual de TLS.</li><li>Realizar auditorías periódicas de seguridad TLS utilizando las herramientas mencionadas para identificar posibles vulnerabilidades.</li><li>Asegurarse de que se utilicen versiones actualizadas de TLS, preferiblemente TLS 1.2 o superior, y deshabilitar versiones obsoletas como SSL 2.0 y SSL 3.0.</li><li>Implementar políticas de seguridad que incluyan el uso de cifrados fuertes y seguros, evitando aquellos que sean considerados débiles o vulnerables.</li><li>Configurar correctamente los certificados TLS, asegurándose de que sean válidos, no estén caducados y sean emitidos por una autoridad de certificación confiable.</li><li>Monitorear y registrar el tráfico TLS para detectar actividades sospechosas o intentos de ataque, y responder de manera adecuada.</li><li>Capacitar al personal técnico sobre las mejores prácticas de seguridad TLS y la importancia de mantener la infraestructura actualizada.</li><li>Realizar pruebas de penetración específicas para TLS para evaluar la resistencia de la implementación ante posibles ataques.</li></ul>
+        </section>
+    </div>
+</body>
+</html>

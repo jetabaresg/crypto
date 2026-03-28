@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
+from motores.recomendador_ia import generar_recomendaciones_ia
+
 
 _PESOS = {
     "critical": 40,
@@ -72,7 +74,22 @@ def evaluar_resultados(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
 
     score = _calcular_score(hallazgos)
     riesgo = _clasificar_riesgo(score)
-    recomendaciones = _consolidar_recomendaciones(hallazgos)
+    recomendaciones_base = _consolidar_recomendaciones(hallazgos)
+    recomendaciones, recomendaciones_fuente = _recomendaciones_con_ia(
+        resultados=resultados,
+        hallazgos=hallazgos,
+        score=score,
+        riesgo=riesgo,
+        protocolos=sorted(protocolos),
+        recomendaciones_fallback=recomendaciones_base,
+    )
+    herramientas_ok, herramientas_total = _resumen_herramientas(resultados)
+    prueba_completa = herramientas_ok == herramientas_total
+    estado_prueba = (
+        "Prueba realizada correctamente"
+        if prueba_completa
+        else "Prueba parcial: faltan herramientas o alguna no respondio"
+    )
 
     return {
         "score": score,
@@ -80,6 +97,11 @@ def evaluar_resultados(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         "protocolos_detectados": sorted(protocolos),
         "hallazgos": hallazgos,
         "recomendaciones": recomendaciones,
+        "recomendaciones_fuente": recomendaciones_fuente,
+        "herramientas_ok": herramientas_ok,
+        "herramientas_total": herramientas_total,
+        "prueba_completa": prueba_completa,
+        "estado_prueba": estado_prueba,
     }
 
 
@@ -126,3 +148,46 @@ def _consolidar_recomendaciones(hallazgos: List[Dict[str, str]]) -> List[str]:
         if rec not in unicas:
             unicas.append(rec)
     return unicas
+
+
+def _recomendaciones_con_ia(
+    resultados: Dict[str, Dict[str, Any]],
+    hallazgos: List[Dict[str, str]],
+    score: int,
+    riesgo: str,
+    protocolos: List[str],
+    recomendaciones_fallback: List[str],
+) -> tuple[List[str], str]:
+    estado_herramientas = {}
+    for nombre, data in resultados.items():
+        metadata = data.get("metadata", {})
+        parsed = data.get("parsed", {})
+        estado_herramientas[nombre] = {
+            "disponible": metadata.get("disponible", False),
+            "returncode": metadata.get("returncode"),
+            "stderr": metadata.get("stderr", ""),
+            "protocolos": parsed.get("protocolos", []),
+            "cifrados_count": len(parsed.get("cifrados", [])),
+        }
+
+    analisis = {
+        "score": score,
+        "riesgo": riesgo,
+        "protocolos_detectados": protocolos,
+        "hallazgos": hallazgos,
+        "herramientas": estado_herramientas,
+    }
+
+    recomendaciones_ia = generar_recomendaciones_ia(analisis)
+    if recomendaciones_ia:
+        return recomendaciones_ia, "ia"
+    return recomendaciones_fallback, "fallback"
+
+
+def _resumen_herramientas(resultados: Dict[str, Dict[str, Any]]) -> tuple[int, int]:
+    herramientas_ok = 0
+    for fuente in _FUENTES:
+        metadata = resultados.get(fuente, {}).get("metadata", {})
+        if metadata.get("disponible", False):
+            herramientas_ok += 1
+    return herramientas_ok, len(_FUENTES)

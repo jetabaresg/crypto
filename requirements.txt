@@ -8,3 +8,21 @@
 # - testssl.sh (comando: testssl.sh)
 # - openssl
 # - bash (Git Bash/WSL en Windows)
+
+# API IA para recomendaciones (opcional, configurable por entorno)
+# - AI_PROVIDER: openai | azure | openrouter | custom (default: openai)
+# - AI_RECOMMENDER_MODEL: modelo a usar (default: gpt-4o-mini)
+#
+# OpenAI (recomendado)
+# - OPENAI_API_KEY
+# - AI_RECOMMENDER_API_URL opcional (default: https://api.openai.com/v1/chat/completions)
+#
+# Azure OpenAI
+# - AZURE_OPENAI_API_KEY
+# - AZURE_OPENAI_ENDPOINT
+# - AZURE_OPENAI_DEPLOYMENT
+# - AZURE_OPENAI_API_VERSION opcional
+#
+# OpenRouter
+# - OPENROUTER_API_KEY
+# - AI_RECOMMENDER_API_URL opcional (default: https://openrouter.ai/api/v1/chat/completions)

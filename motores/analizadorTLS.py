@@ -98,24 +98,23 @@ def analizar_tls(objetivo: str, puerto: int = 443, timeout: int = 25) -> Dict[st
         if shutil.which(path) is not None:
             testssl_cmd = [path, "--warnings", "off", "--quiet", f"{objetivo}:{puerto}"]
             break
+    if testssl_cmd is None:
+        testssl_cmd = ["testssl.sh", "--warnings", "off", "--quiet", f"{objetivo}:{puerto}"]
     
     herramientas = {
         "nmap": {
             "cmd": ["nmap", "-p", str(puerto), "--script", "ssl-enum-ciphers,ssl-heartbleed,ssl-poodle", objetivo],
             "parser": parse_nmap,
         },
+        "testssl": {
+            "cmd": testssl_cmd,
+            "parser": parse_testssl,
+        },
         "sslscan": {
             "cmd": _construir_cmd_sslscan(objetivo, puerto),
             "parser": parse_sslscan,
         },
     }
-    
-    # Agregar testssl solo si se encontró
-    if testssl_cmd:
-        herramientas["testssl"] = {
-            "cmd": testssl_cmd,
-            "parser": parse_testssl,
-        }
 
     resultados: Dict[str, Dict[str, Any]] = {}
     for nombre, conf in herramientas.items():
