@@ -4,6 +4,9 @@ import re
 from typing import Iterable, List
 
 PROTOCOLO_RE = re.compile(r"\b(SSLv2|SSLv3|TLSv1(?:\.0|\.1|\.2|\.3)?)\b", flags=re.IGNORECASE)
+CIFRADO_RE = re.compile(
+    r"\b(TLS_[A-Z0-9_]+|ECDHE-[A-Z0-9-]+|DHE-[A-Z0-9-]+|AES[0-9]+-[A-Z0-9-]+|CHACHA20-[A-Z0-9-]+)\b"
+)
 
 
 def normalizar_protocolo(valor: str) -> str:
@@ -20,6 +23,10 @@ def normalizar_protocolo(valor: str) -> str:
 def extraer_protocolos(texto: str) -> List[str]:
     encontrados = PROTOCOLO_RE.findall(texto)
     return sorted({normalizar_protocolo(p) for p in encontrados})
+
+
+def extraer_cifrados(texto: str) -> List[str]:
+    return ordenar_unicos(CIFRADO_RE.findall(texto))
 
 
 def ordenar_unicos(items: Iterable[str]) -> List[str]:

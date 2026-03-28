@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import Dict, List
 
-from parsers.common import extraer_protocolos, normalizar_protocolo, ordenar_unicos
+from parsers.common import extraer_cifrados, extraer_protocolos, normalizar_protocolo, ordenar_unicos
 
 
 def parse_sslscan(raw: str) -> Dict[str, List[str]]:
@@ -16,10 +16,7 @@ def parse_sslscan(raw: str) -> Dict[str, List[str]]:
     cifrados = [cifrado.strip() for _, cifrado in aceptados]
 
     if not cifrados:
-        cifrados = re.findall(
-            r"\b(TLS_[A-Z0-9_]+|ECDHE-[A-Z0-9-]+|DHE-[A-Z0-9-]+|AES[0-9]+-[A-Z0-9-]+|CHACHA20-[A-Z0-9-]+)\b",
-            raw,
-        )
+        cifrados = extraer_cifrados(raw)
 
     return {
         "protocolos": ordenar_unicos(extraer_protocolos(raw) + protocolos_en_aceptados),

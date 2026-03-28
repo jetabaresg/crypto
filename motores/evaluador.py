@@ -9,6 +9,9 @@ _PESOS = {
     "medium": 15,
     "low": 8,
 }
+_FUENTES = ("nmap", "testssl", "sslscan", "openssl")
+_PROTOCOLS_INSEGUROS = {"SSLv2", "SSLv3", "TLSv1", "TLSv1.0", "TLSv1.1"}
+_MARCAS_CIFRADO_DEBIL = ("RC4", "3DES", "DES", "MD5", "NULL", "EXPORT")
 
 
 def _hallazgo(
@@ -28,17 +31,9 @@ def _hallazgo(
 def evaluar_resultados(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     hallazgos: List[Dict[str, str]] = []
 
-    protocolos = set()
-    cifrados = set()
+    protocolos, cifrados = _agrupar_protocolos_y_cifrados(resultados)
 
-    for fuente in ("nmap", "testssl", "sslscan", "openssl"):
-        parsed = resultados.get(fuente, {}).get("parsed", {})
-        protocolos.update(parsed.get("protocolos", []))
-        cifrados.update(parsed.get("cifrados", []))
-
-    inseguros_proto = sorted(
-        p for p in protocolos if p in {"SSLv2", "SSLv3", "TLSv1", "TLSv1.0", "TLSv1.1"}
-    )
+    inseguros_proto = sorted(p for p in protocolos if p in _PROTOCOLS_INSEGUROS)
     if inseguros_proto:
         hallazgos.append(
             _hallazgo(
@@ -52,7 +47,7 @@ def evaluar_resultados(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     debiles = sorted(
         c
         for c in cifrados
-        if any(marca in c.upper() for marca in ("RC4", "3DES", "DES", "MD5", "NULL", "EXPORT"))
+        if any(marca in c.upper() for marca in _MARCAS_CIFRADO_DEBIL)
     )
     if debiles:
         hallazgos.append(
@@ -86,6 +81,18 @@ def evaluar_resultados(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         "hallazgos": hallazgos,
         "recomendaciones": recomendaciones,
     }
+
+
+def _agrupar_protocolos_y_cifrados(resultados: Dict[str, Dict[str, Any]]) -> tuple[set[str], set[str]]:
+    protocolos: set[str] = set()
+    cifrados: set[str] = set()
+
+    for fuente in _FUENTES:
+        parsed = resultados.get(fuente, {}).get("parsed", {})
+        protocolos.update(parsed.get("protocolos", []))
+        cifrados.update(parsed.get("cifrados", []))
+
+    return protocolos, cifrados
 
 
 def _calcular_score(hallazgos: List[Dict[str, str]]) -> int:

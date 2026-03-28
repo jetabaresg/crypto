@@ -107,27 +107,27 @@ def _fila_hallazgo(hallazgo: Dict[str, str]) -> str:
 
 
 def _fila_herramienta(nombre: str, data: Dict[str, Any]) -> str:
-    meta = data.get("metadata", {})
-    parsed = data.get("parsed", {})
-    disponible = meta.get("disponible", False)
-    code = meta.get("returncode")
+	meta = data.get("metadata", {})
+	parsed = data.get("parsed", {})
+	disponible = meta.get("disponible", False)
+	code = meta.get("returncode")
 	detalle_error = meta.get("stderr", "") or "-"
 
-    if disponible and code == 0:
-        estado = "OK"
-    elif not disponible:
-        estado = "No disponible"
-    else:
-        estado = f"Error ({code})"
+	if disponible and code == 0:
+		estado = "OK"
+	elif not disponible:
+		estado = "No disponible"
+	else:
+		estado = f"Error ({code})"
 
-    protos = ", ".join(parsed.get("protocolos", [])) or "-"
-    cifrados = str(len(parsed.get("cifrados", [])))
-    return (
-        "<tr>"
-        f"<td>{escape(nombre)}</td>"
-        f"<td>{escape(estado)}</td>"
-        f"<td>{escape(protos)}</td>"
-        f"<td>{escape(cifrados)}</td>"
+	protos = ", ".join(parsed.get("protocolos", [])) or "-"
+	cifrados = str(len(parsed.get("cifrados", [])))
+	return (
+		"<tr>"
+		f"<td>{escape(nombre)}</td>"
+		f"<td>{escape(estado)}</td>"
+		f"<td>{escape(protos)}</td>"
+		f"<td>{escape(cifrados)}</td>"
 		f"<td>{escape(detalle_error)}</td>"
-        "</tr>"
-    )
+		"</tr>"
+	)

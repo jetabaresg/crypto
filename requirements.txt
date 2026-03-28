@@ -1,1 +1,10 @@
-# Sin dependencias externas obligatorias.
+# Dependencias de Python
+# Este proyecto usa solo la libreria estandar de Python.
+# No hay paquetes pip obligatorios.
+
+# Requisitos de sistema (instalacion manual)
+# - nmap
+# - sslscan
+# - testssl.sh (comando: testssl.sh)
+# - openssl
+# - bash (Git Bash/WSL en Windows)
