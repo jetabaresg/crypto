@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -85,21 +86,36 @@ def _resultado_parseado(raw_tool: Dict[str, Any], parser) -> Dict[str, Any]:
     }
 
 
-def analizar_tls(objetivo: str, puerto: int = 443, timeout: int = 25) -> Dict[str, Dict[str, Any]]:
-    # Buscar testssl.sh en ubicaciones comunes
-    testssl_paths = [
+def _resolver_testssl() -> str:
+    # Permite inyectar ruta explicita, por ejemplo:
+    # TESTSSL_PATH=~/testssl.sh/testssl.sh
+    ruta_env = os.getenv("TESTSSL_PATH", "").strip()
+    if ruta_env:
+        candidata = Path(ruta_env).expanduser()
+        if candidata.is_dir():
+            candidata = candidata / "testssl.sh"
+        if candidata.exists():
+            return str(candidata)
+
+    rutas_comunes = [
         "testssl.sh",
+        str(Path.home() / "testssl.sh" / "testssl.sh"),
+        str(Path.home() / "tools" / "testssl.sh" / "testssl.sh"),
         r"C:\testssl\testssl.sh",
         r"C:\git\testssl\testssl.sh",
         r"C:\Program Files\testssl\testssl.sh",
     ]
-    testssl_cmd = None
-    for path in testssl_paths:
-        if shutil.which(path) is not None:
-            testssl_cmd = [path, "--warnings", "off", "--quiet", f"{objetivo}:{puerto}"]
-            break
-    if testssl_cmd is None:
-        testssl_cmd = ["testssl.sh", "--warnings", "off", "--quiet", f"{objetivo}:{puerto}"]
+
+    for ruta in rutas_comunes:
+        expandida = Path(ruta).expanduser()
+        if expandida.exists() or shutil.which(str(expandida)):
+            return str(expandida)
+
+    return "testssl.sh"
+
+
+def analizar_tls(objetivo: str, puerto: int = 443, timeout: int = 25) -> Dict[str, Dict[str, Any]]:
+    testssl_cmd = [_resolver_testssl(), "--warnings", "off", "--quiet", f"{objetivo}:{puerto}"]
     
     herramientas = {
         "nmap": {
