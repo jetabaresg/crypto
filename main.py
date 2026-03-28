@@ -91,11 +91,13 @@ def main() -> None:
             print("[+] Recomendaciones: IA activa")
         else:
             print("[+] Recomendaciones: fallback local")
-        herramientas_ok = evaluacion.get("herramientas_ok", 0)
+        herramientas_ok = evaluacion.get("herramientas_validas", evaluacion.get("herramientas_ok", 0))
+        herramientas_invalidas = evaluacion.get("herramientas_invalidas", 0)
         herramientas_total = evaluacion.get("herramientas_total", 4)
         print(
             f"[+] Riesgo: {evaluacion['riesgo']} | "
-            f"Score: {evaluacion['score']}/100 ({herramientas_ok}/{herramientas_total} herramientas)"
+            f"Score: {evaluacion['score']}/100 "
+            f"({herramientas_ok}/{herramientas_total} validas, {herramientas_invalidas} invalidas)"
         )
         print(f"[+] Estado de prueba: {evaluacion.get('estado_prueba', 'Sin estado')}")
         print(f"[+] Reporte generado: {salida.resolve()}")

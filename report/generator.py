@@ -18,7 +18,8 @@ def generar_reporte_html(
 
     herramientas_html = "".join(_fila_herramienta(nombre, data) for nombre, data in resultados.items())
     recomendaciones = "".join(f"<li>{escape(r)}</li>" for r in evaluacion["recomendaciones"])
-    herramientas_ok = evaluacion.get("herramientas_ok", 0)
+    herramientas_ok = evaluacion.get("herramientas_validas", evaluacion.get("herramientas_ok", 0))
+    herramientas_invalidas = evaluacion.get("herramientas_invalidas", 0)
     herramientas_total = evaluacion.get("herramientas_total", 4)
     estado_prueba = evaluacion.get("estado_prueba", "Sin estado")
 
@@ -46,7 +47,7 @@ def generar_reporte_html(
         <section class=\"card\">
             <h1>Reporte de Seguridad TLS</h1>
             <p><strong>Objetivo:</strong> {escape(objetivo)}:{puerto}</p>
-            <p><strong>Score:</strong> {evaluacion['score']}/100 ({herramientas_ok}/{herramientas_total} herramientas)</p>
+            <p><strong>Score:</strong> {evaluacion['score']}/100 ({herramientas_ok}/{herramientas_total} validas, {herramientas_invalidas} invalidas)</p>
             <p><strong>Estado de prueba:</strong> {escape(estado_prueba)}</p>
             <p><strong>Riesgo:</strong> <span class=\"pill\">{escape(evaluacion['riesgo'])}</span></p>
             <p><strong>Protocolos detectados:</strong> {escape(', '.join(evaluacion['protocolos_detectados']) or '-')}</p>

@@ -83,8 +83,8 @@ def evaluar_resultados(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         protocolos=sorted(protocolos),
         recomendaciones_fallback=recomendaciones_base,
     )
-    herramientas_ok, herramientas_total = _resumen_herramientas(resultados)
-    prueba_completa = herramientas_ok == herramientas_total
+    herramientas_validas, herramientas_invalidas, herramientas_total = _resumen_herramientas(resultados)
+    prueba_completa = herramientas_validas == herramientas_total
     estado_prueba = (
         "Prueba realizada correctamente"
         if prueba_completa
@@ -98,7 +98,9 @@ def evaluar_resultados(resultados: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         "hallazgos": hallazgos,
         "recomendaciones": recomendaciones,
         "recomendaciones_fuente": recomendaciones_fuente,
-        "herramientas_ok": herramientas_ok,
+        "herramientas_ok": herramientas_validas,
+        "herramientas_validas": herramientas_validas,
+        "herramientas_invalidas": herramientas_invalidas,
         "herramientas_total": herramientas_total,
         "prueba_completa": prueba_completa,
         "estado_prueba": estado_prueba,
@@ -184,10 +186,15 @@ def _recomendaciones_con_ia(
     return recomendaciones_fallback, "fallback"
 
 
-def _resumen_herramientas(resultados: Dict[str, Dict[str, Any]]) -> tuple[int, int]:
-    herramientas_ok = 0
+def _resumen_herramientas(resultados: Dict[str, Dict[str, Any]]) -> tuple[int, int, int]:
+    herramientas_validas = 0
+    herramientas_invalidas = 0
     for fuente in _FUENTES:
         metadata = resultados.get(fuente, {}).get("metadata", {})
-        if metadata.get("disponible", False):
-            herramientas_ok += 1
-    return herramientas_ok, len(_FUENTES)
+        disponible = metadata.get("disponible", False)
+        returncode = metadata.get("returncode")
+        if disponible and returncode == 0:
+            herramientas_validas += 1
+        else:
+            herramientas_invalidas += 1
+    return herramientas_validas, herramientas_invalidas, len(_FUENTES)
