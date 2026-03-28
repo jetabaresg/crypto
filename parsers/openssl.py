@@ -4,7 +4,7 @@ import re
 from datetime import datetime, timezone
 from typing import Any, Dict
 
-from parsers.common import normalizar_protocolo
+from parsers.common import normalizar_protocolo, ordenar_unicos
 
 
 _FORMATOS = ["%b %d %H:%M:%S %Y %Z", "%b %d %H:%M:%S %Y GMT"]
@@ -14,10 +14,21 @@ def parse_openssl(raw: str) -> Dict[str, Any]:
     not_after = _extraer_not_after(raw)
     fecha = _parse_fecha(not_after) if not_after else None
     expirado = bool(fecha and fecha < datetime.now(tz=timezone.utc))
-    protocolo = _extraer_protocolo_openssl(raw)
+    
+    protocolos = []
+    cifrados = []
+    
+    proto_m = re.findall(r"^\s*Protocol\s*:\s*(.+)$", raw, flags=re.MULTILINE | re.IGNORECASE)
+    for p in proto_m:
+        protocolos.append(normalizar_protocolo(p.strip()))
+        
+    ciph_m = re.findall(r"^\s*Cipher\s*:\s*(.+)$", raw, flags=re.MULTILINE | re.IGNORECASE)
+    for c in ciph_m:
+        cifrados.append(c.strip())
+
     return {
-        "protocolos": [protocolo] if protocolo else [],
-        "cifrados": [],
+        "protocolos": ordenar_unicos(protocolos),
+        "cifrados": ordenar_unicos(cifrados),
         "certificado": {
             "not_after": not_after,
             "expirado": expirado,

@@ -8,17 +8,14 @@ from parsers.common import extraer_cifrados, extraer_protocolos, normalizar_prot
 
 def parse_sslscan(raw: str) -> Dict[str, List[str]]:
     aceptados = re.findall(
-        r"^Accepted\s+(\S+)\s+\d+\s+bits\s+([^\r\n]+)",
+        r"^(?:Accepted|Preferred)\s+(\S+)\s+\d+\s+bits?\s+([^\r\n]+)",
         raw,
-        flags=re.MULTILINE,
+        flags=re.MULTILINE | re.IGNORECASE,
     )
-    protocolos_en_aceptados = [normalizar_protocolo(proto) for proto, _ in aceptados]
+    protocolos = [normalizar_protocolo(proto) for proto, _ in aceptados]
     cifrados = [cifrado.strip() for _, cifrado in aceptados]
 
-    if not cifrados:
-        cifrados = extraer_cifrados(raw)
-
     return {
-        "protocolos": ordenar_unicos(extraer_protocolos(raw) + protocolos_en_aceptados),
+        "protocolos": ordenar_unicos(protocolos),
         "cifrados": ordenar_unicos(cifrados),
     }

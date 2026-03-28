@@ -32,10 +32,23 @@ def _protocolos_habilitados_testssl(raw: str) -> List[str]:
 
 def parse_testssl(raw: str) -> Dict[str, List[str]]:
     protocolos = _protocolos_habilitados_testssl(raw)
-    if not protocolos:
-        protocolos = extraer_protocolos(raw)
+    
+    cifrados = []
+    # Testssl cipher lines are usually indented and look like:
+    # " xc02f   ECDHE-RSA-AES128-GCM-SHA256" or " TLS 1.2   TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+    # or "      TLS_RSA_WITH_AES_128_GCM_SHA256"
+    cifrado_re = re.compile(
+        r"^\s*(?:x[0-9a-fA-F]+\s+|TLS[ \t]+\d\.\d[ \t]+)?(?:[a-zA-Z0-9_\-.]+[ \t]+)?(TLS_[A-Z0-9_]+|ECDHE-[A-Z0-9-]+|DHE-[A-Z0-9-]+|AES[0-9]+-[A-Z0-9-]+|CHACHA20-[A-Z0-9-]+)",
+        flags=re.IGNORECASE
+    )
+    for linea in raw.splitlines():
+        match = cifrado_re.search(linea)
+        if match:
+            lower_line = linea.lower()
+            if not any(x in lower_line for x in ("cve", "vulnerable", "sweet32", "drown", "logjam", "freak", "poodle", "not offered", "not supported", "failed")):
+                cifrados.append(match.group(1).upper().replace("Tls_", "TLS_"))
 
     return {
         "protocolos": protocolos,
-        "cifrados": extraer_cifrados(raw),
+        "cifrados": ordenar_unicos(cifrados),
     }

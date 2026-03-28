@@ -116,7 +116,7 @@ def _resolver_testssl() -> str:
 
 def _construir_cmd_testssl(objetivo: str, puerto: int) -> list[str]:
     ruta = _resolver_testssl()
-    args = ["--warnings", "off", "--quiet"]
+    args = ["--warnings", "off", "--quiet", "--color", "0"]
 
     # En modo rapido reduce mucho los 124 en entornos lentos.
     if os.getenv("TESTSSL_FAST", "1").strip() != "0":
